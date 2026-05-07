@@ -18,7 +18,7 @@ public class TransactionImport {
     private String id;
     private final String filename;
     private final String iban;
-    private final YearMonth month;
+    private final String month;
     private ImportStatus importStatus;
     private final Instant importTime;
     Integer skippedRows;

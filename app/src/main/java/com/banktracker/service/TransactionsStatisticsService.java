@@ -31,6 +31,14 @@ public class TransactionsStatisticsService {
 
     }
 
+    public String getStatsByMonth(YearMonth month, String iban) {
+        return null;
+    }
+
+    public String getIbans() {
+        return null;
+    }
+
     private record CategoryStatsMongoResult(
             TransactionType type,
             YearMonth month,

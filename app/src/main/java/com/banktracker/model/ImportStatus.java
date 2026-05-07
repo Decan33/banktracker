@@ -4,5 +4,6 @@ public enum ImportStatus {
     NEW,
     PENDING,
     FAILED,
-    COMPLETED
+    COMPLETED,
+    COMPLETED_WITH_ERRORS
 }

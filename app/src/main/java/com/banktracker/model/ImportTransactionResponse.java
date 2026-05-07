@@ -1,6 +1,6 @@
 package com.banktracker.model;
 
-import java.util.UUID;
+import java.util.List;
 
-public record ImportTransactionResponse(UUID importTransactionId, ImportStatus status, Integer importedRows, Integer skippedRows) {
+public record ImportTransactionResponse(String importTransactionId, ImportStatus status, Integer importedRows, Integer skippedRows, List<ParsingErrorInfo> errors) {
 }

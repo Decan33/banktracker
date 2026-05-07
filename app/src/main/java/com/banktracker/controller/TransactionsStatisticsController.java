@@ -1,30 +1,36 @@
 package com.banktracker.controller;
 
+import com.banktracker.model.CategoryStatsResponse;
+import com.banktracker.service.TransactionsStatisticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.YearMonth;
+import java.util.List;
 
-@RestController("/statistics")
+@RestController
+@RequestMapping("/statistics")
 @RequiredArgsConstructor
 public class TransactionsStatisticsController {
 
-    @PostMapping("/categories")
-    public String statisticsCategories(@RequestParam YearMonth from,
-                                       @RequestParam YearMonth to,
-                                       @RequestParam(required = false) String iban
-    ) {
+    private final TransactionsStatisticsService statisticsService;
 
-        return null;
+    @PostMapping("/categories")
+    public List<CategoryStatsResponse> statisticsCategories(@RequestParam YearMonth from,
+                                                            @RequestParam YearMonth to,
+                                                            @RequestParam(required = false) String iban
+    ) {
+        return statisticsService.getCategories(from, to, iban);
     }
 
     @PostMapping("/month")
     public String statisticsMonth(@RequestParam YearMonth month,
                                   @RequestParam(required = false) String iban
     ) {
-        return null;
+        return statisticsService.getStatsByMonth(month, iban);
     }
 
     @PostMapping("/iban")
@@ -32,6 +38,6 @@ public class TransactionsStatisticsController {
                                  @RequestParam String iban
     ) {
 
-        return null;
+        return statisticsService.getIbans();
     }
 }
