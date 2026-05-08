@@ -1,11 +1,11 @@
 package com.banktracker.service;
 
-import com.banktracker.model.BankingTransactionInfo;
 import com.banktracker.model.CategoryStatsResponse;
-import com.banktracker.model.IbanStatsResponse;
 import com.banktracker.model.MonthlyStatsResponse;
+import com.banktracker.model.TransactionResponse;
 import com.banktracker.model.TransactionType;
-import com.banktracker.repository.BankTransactionRepository;
+import com.banktracker.repository.TransactionStatisticsRepository;
+import com.banktracker.util.TransactionMapper;
 import com.banktracker.util.TransactionStatsAggregationFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -24,7 +24,7 @@ public class TransactionsStatisticsService {
     private final MongoTemplate mongoTemplate;
     private final TransactionStatsAggregationFactory aggregationFactory;
 
-    private final BankTransactionRepository bankTransactionRepository;
+    private final TransactionStatisticsRepository bankTransactionRepository;
 
     public List<CategoryStatsResponse> getCategories(String iban) {
 
@@ -50,17 +50,17 @@ public class TransactionsStatisticsService {
                 .toList();
     }
 
-    public Page<BankingTransactionInfo> getAllTransactions(Pageable pageable) {
-        return bankTransactionRepository.findAll(pageable);
+    public Page<TransactionResponse> getAllTransactions(Pageable pageable) {
+        return bankTransactionRepository.findAll(pageable).map(TransactionMapper::toResponse);
     }
 
-    public Page<BankingTransactionInfo> getTransactionsWithIban(String iban, Pageable pageable) {
-        return bankTransactionRepository.findByIban(iban, pageable);
+    public Page<TransactionResponse> getTransactionsWithIban(String iban, Pageable pageable) {
+        return bankTransactionRepository.findByIban(iban, pageable).map(TransactionMapper::toResponse);
     }
 
     private record CategoryStatsMongoResult(
             TransactionType type,
-            YearMonth month,
+            String month,
             long transactionCount,
             BigDecimal income,
             BigDecimal expense,

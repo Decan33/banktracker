@@ -1,8 +1,8 @@
 package com.banktracker.controller;
 
-import com.banktracker.model.BankingTransactionInfo;
 import com.banktracker.model.CategoryStatsResponse;
 import com.banktracker.model.MonthlyStatsResponse;
+import com.banktracker.model.TransactionResponse;
 import com.banktracker.service.TransactionsStatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import java.time.YearMonth;
 import java.util.List;
 
 @RestController
-@RequestMapping("/statistics")
+@RequestMapping("/api/v1/transactions-statistics")
 @RequiredArgsConstructor
 @Slf4j
 public class TransactionsStatisticsController {
@@ -32,7 +32,7 @@ public class TransactionsStatisticsController {
         return statisticsService.getCategories(iban);
     }
 
-    @GetMapping("/month")
+    @GetMapping("/monthly")
     public List<MonthlyStatsResponse> statisticsMonth(@RequestParam(required = false) YearMonth from,
                                                       @RequestParam(required = false) YearMonth to,
                                                       @RequestParam(required = false) String iban
@@ -41,8 +41,8 @@ public class TransactionsStatisticsController {
     }
 
     @GetMapping("/iban")
-    public Page<BankingTransactionInfo> statisticsIban(@RequestParam(required = false) String iban,
-                                                       @PageableDefault(
+    public Page<TransactionResponse> statisticsIban(@RequestParam(required = false) String iban,
+                                                    @PageableDefault(
                                                                size = 100,
                                                                sort = "iban",
                                                                direction = Sort.Direction.ASC

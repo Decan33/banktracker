@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface TransactionImportRepository
         extends MongoRepository<TransactionImport, String> {
+
+    boolean existsByChecksum(String checksum);
 }

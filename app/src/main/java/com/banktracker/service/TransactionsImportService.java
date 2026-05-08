@@ -1,13 +1,15 @@
 package com.banktracker.service;
 
-import com.banktracker.model.BankingTransactionInfo;
+import com.banktracker.exceptions.CsvImportException;
+import com.banktracker.model.TransactionDocument;
 import com.banktracker.model.ImportStatus;
 import com.banktracker.model.ImportTransactionResponse;
 import com.banktracker.model.ParsedTransactionFile;
 import com.banktracker.model.TransactionImport;
-import com.banktracker.repository.BankTransactionRepository;
+import com.banktracker.repository.TransactionStatisticsRepository;
 import com.banktracker.repository.TransactionImportRepository;
-import com.banktracker.util.TransactionParserUtil;
+import com.banktracker.util.FileChecksumService;
+import com.banktracker.util.CsvTransactionParser;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
@@ -20,22 +22,35 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class TransactionImportService {
-    private final BankTransactionRepository transactionRepository;
+public class TransactionsImportService {
+    private final TransactionStatisticsRepository transactionRepository;
     private final TransactionImportRepository transactionImportRepository;
+    private final FileChecksumService fileChecksumService;
 
     public ImportTransactionResponse importTransaction(MultipartFile csvFile, String iban, YearMonth month) {
+        validateFile(csvFile);
+
+        String checksum = fileChecksumService.sha256(csvFile);
+
+        if (transactionImportRepository.existsByChecksum(checksum)) {
+            throw new CsvImportException(
+                    "This CSV file was already imported"
+            );
+        }
+
         var sessionId = UUID.randomUUID().toString();
         log.info("Starting importing transaction with NEW sessionId: {}", sessionId);
         var importedTransaction = TransactionImport
                 .builder()
                 .id(sessionId)
                 .filename(csvFile.getOriginalFilename())
+                .checksum(checksum)
                 .iban(iban)
                 .month(month.toString())
                 .importStatus(ImportStatus.NEW)
@@ -47,21 +62,22 @@ public class TransactionImportService {
         ParsedTransactionFile transactionInfos;
         try {
             transactionInfos = parseTransactionFile(csvFile, t.getId());
+            ImportStatus finalStatus = transactionInfos.errors().isEmpty()
+                    ? ImportStatus.COMPLETED
+                    : ImportStatus.COMPLETED_WITH_ERRORS;
             transactionRepository.saveAll(transactionInfos.transactions());
 
-            t.setImportStatus(ImportStatus.COMPLETED);
+            t.setImportStatus(finalStatus);
             t.setImportedRows(transactionInfos.transactions().size());
             t.setSkippedRows(transactionInfos.errors().size());
 
             transactionImportRepository.save(t);
 
-            var importStatus = transactionInfos.errors().isEmpty() ? ImportStatus.COMPLETED : ImportStatus.COMPLETED_WITH_ERRORS;
-
             var errors = transactionInfos.errors();
 
             return new ImportTransactionResponse(
                     t.getId(),
-                    importStatus,
+                    finalStatus,
                     transactionInfos.transactions().size(),
                     errors.size(),
                     errors
@@ -92,15 +108,40 @@ public class TransactionImportService {
                         .ofNamedCsvRecord(csvFile.getInputStream())
         ) {
 
-            TransactionParserUtil parser =
-                    new TransactionParserUtil(csv, sessionId);
+            CsvTransactionParser parser =
+                    new CsvTransactionParser(csv, sessionId);
 
-            List<BankingTransactionInfo> parsed =
+            List<TransactionDocument> parsed =
                     parser.parse();
 
             return new ParsedTransactionFile(
                     parsed,
                     parser.getErrors()
+            );
+        }
+    }
+
+    private void validateFile(MultipartFile file) {
+
+        if (file.isEmpty()) {
+            throw new CsvImportException(
+                    "Uploaded file is empty"
+            );
+        }
+
+        if (!Objects.requireNonNull(file.getOriginalFilename())
+                .endsWith(".csv")) {
+
+            throw new CsvImportException(
+                    "Only CSV files are supported"
+            );
+        }
+
+        long maxSize = 20 * 1024 * 1024;
+
+        if (file.getSize() > maxSize) {
+            throw new CsvImportException(
+                    "CSV file exceeds maximum size"
             );
         }
     }

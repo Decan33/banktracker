@@ -1,7 +1,7 @@
 package com.banktracker.controller;
 
 import com.banktracker.model.ImportTransactionResponse;
-import com.banktracker.service.TransactionImportService;
+import com.banktracker.service.TransactionsImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,13 +12,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.YearMonth;
 
 @RestController
-@RequestMapping("/transactions")
+@RequestMapping
 @RequiredArgsConstructor
-public class TransactionsController {
+public class TransactionsImportController {
 
-    private final TransactionImportService service;
+    private final TransactionsImportService service;
 
-    @PostMapping("/import")
+    @PostMapping("/api/v1/transactions-import")
     public ImportTransactionResponse uploadBankingInformation(@RequestParam("csv") MultipartFile csvFile, @RequestParam String accountIban, @RequestParam YearMonth month) {
 
         return service.importTransaction(csvFile, accountIban, month);
