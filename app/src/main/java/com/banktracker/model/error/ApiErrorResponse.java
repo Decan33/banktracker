@@ -1,4 +1,4 @@
-package com.banktracker.model;
+package com.banktracker.model.error;
 
 import java.time.Instant;
 

@@ -1,12 +1,12 @@
 package com.banktracker.service;
 
-import com.banktracker.model.CategoryStatsResponse;
-import com.banktracker.model.MonthlyStatsResponse;
-import com.banktracker.model.TransactionResponse;
+import com.banktracker.model.response.CategoryStatsResponse;
+import com.banktracker.model.response.MonthlyStatsResponse;
+import com.banktracker.model.response.TransactionResponse;
 import com.banktracker.model.TransactionType;
 import com.banktracker.repository.TransactionStatisticsRepository;
 import com.banktracker.util.TransactionMapper;
-import com.banktracker.util.TransactionStatsAggregationFactory;
+import com.banktracker.aggregation.TransactionStatsAggregationFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

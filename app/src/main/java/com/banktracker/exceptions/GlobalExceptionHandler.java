@@ -1,6 +1,6 @@
 package com.banktracker.exceptions;
 
-import com.banktracker.model.ApiErrorResponse;
+import com.banktracker.model.error.ApiErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

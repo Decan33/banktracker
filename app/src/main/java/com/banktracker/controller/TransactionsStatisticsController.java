@@ -1,8 +1,8 @@
 package com.banktracker.controller;
 
-import com.banktracker.model.CategoryStatsResponse;
-import com.banktracker.model.MonthlyStatsResponse;
-import com.banktracker.model.TransactionResponse;
+import com.banktracker.model.response.CategoryStatsResponse;
+import com.banktracker.model.response.MonthlyStatsResponse;
+import com.banktracker.model.response.TransactionResponse;
 import com.banktracker.service.TransactionsStatisticsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

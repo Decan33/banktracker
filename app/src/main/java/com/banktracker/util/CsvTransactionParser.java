@@ -2,7 +2,7 @@ package com.banktracker.util;
 
 import com.banktracker.exceptions.InvalidCsvRowException;
 import com.banktracker.model.TransactionDocument;
-import com.banktracker.model.ParsingErrorInfo;
+import com.banktracker.model.error.ParsingErrorInfo;
 import com.banktracker.model.TransactionType;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;

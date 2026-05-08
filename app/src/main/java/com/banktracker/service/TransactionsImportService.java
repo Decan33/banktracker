@@ -2,7 +2,7 @@ package com.banktracker.service;
 
 import com.banktracker.exceptions.CsvImportException;
 import com.banktracker.model.ImportStatus;
-import com.banktracker.model.ImportTransactionResponse;
+import com.banktracker.model.response.ImportTransactionResponse;
 import com.banktracker.model.ParsedTransactionFile;
 import com.banktracker.model.TransactionDocument;
 import com.banktracker.model.TransactionImport;

@@ -1,4 +1,4 @@
-package com.banktracker.util;
+package com.banktracker.aggregation;
 
 import com.banktracker.exceptions.DateConflictException;
 import jakarta.annotation.Nullable;

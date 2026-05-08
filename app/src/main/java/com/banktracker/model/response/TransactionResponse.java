@@ -1,4 +1,6 @@
-package com.banktracker.model;
+package com.banktracker.model.response;
+
+import com.banktracker.model.TransactionType;
 
 import java.math.BigDecimal;
 

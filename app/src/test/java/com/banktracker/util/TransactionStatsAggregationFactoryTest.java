@@ -1,5 +1,6 @@
 package com.banktracker.util;
 
+import com.banktracker.aggregation.TransactionStatsAggregationFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 

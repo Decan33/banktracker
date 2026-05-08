@@ -1,6 +1,6 @@
 package com.banktracker.controller;
 
-import com.banktracker.model.ImportTransactionResponse;
+import com.banktracker.model.response.ImportTransactionResponse;
 import com.banktracker.service.TransactionsImportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;

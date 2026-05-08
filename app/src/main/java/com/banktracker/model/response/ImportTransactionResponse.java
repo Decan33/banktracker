@@ -1,4 +1,7 @@
-package com.banktracker.model;
+package com.banktracker.model.response;
+
+import com.banktracker.model.ImportStatus;
+import com.banktracker.model.error.ParsingErrorInfo;
 
 import java.util.List;
 

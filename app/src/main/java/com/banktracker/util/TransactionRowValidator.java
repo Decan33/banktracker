@@ -49,7 +49,7 @@ public class TransactionRowValidator {
 
     private void validateCurrency(String currency) {
         Set<String> supported =
-                Set.of("PLN", "EUR", "USD", "GBP");
+                Set.of("PLN");
 
         if (!supported.contains(currency)) {
             throw new InvalidCsvRowException(

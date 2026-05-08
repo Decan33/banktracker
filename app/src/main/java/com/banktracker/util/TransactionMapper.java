@@ -1,7 +1,7 @@
 package com.banktracker.util;
 
 import com.banktracker.model.TransactionDocument;
-import com.banktracker.model.TransactionResponse;
+import com.banktracker.model.response.TransactionResponse;
 
 public class TransactionMapper {
 
