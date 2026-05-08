@@ -12,6 +12,7 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,12 +24,14 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class TransactionImportService {
     private final BankTransactionRepository transactionRepository;
     private final TransactionImportRepository transactionImportRepository;
 
     public ImportTransactionResponse importTransaction(MultipartFile csvFile, String iban, YearMonth month) {
         var sessionId = UUID.randomUUID().toString();
+        log.info("Starting importing transaction with NEW sessionId: {}", sessionId);
         var importedTransaction = TransactionImport
                 .builder()
                 .id(sessionId)
@@ -48,19 +51,24 @@ public class TransactionImportService {
 
             t.setImportStatus(ImportStatus.COMPLETED);
             t.setImportedRows(transactionInfos.transactions().size());
-            t.setSkippedRows(0);
+            t.setSkippedRows(transactionInfos.errors().size());
 
             transactionImportRepository.save(t);
 
+            var importStatus = transactionInfos.errors().isEmpty() ? ImportStatus.COMPLETED : ImportStatus.COMPLETED_WITH_ERRORS;
+
+            var errors = transactionInfos.errors();
+
             return new ImportTransactionResponse(
                     t.getId(),
-                    ImportStatus.COMPLETED,
+                    importStatus,
                     transactionInfos.transactions().size(),
-                    0,
-                    transactionInfos.errors()
+                    errors.size(),
+                    errors
             );
 
         } catch (IOException e) {
+            log.error("There is a FAILED importing session with sessionId: {}", sessionId);
             t.setImportStatus(ImportStatus.FAILED);
             t.setErrorMessage(e.getMessage());
             transactionImportRepository.save(t);

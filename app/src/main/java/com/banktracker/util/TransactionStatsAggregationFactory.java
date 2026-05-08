@@ -1,7 +1,10 @@
 package com.banktracker.util;
 
+import com.banktracker.model.MonthlyStatsResponse;
 import jakarta.annotation.Nullable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;
 
@@ -11,33 +14,88 @@ import java.util.List;
 
 @Component
 public class TransactionStatsAggregationFactory {
-    public Aggregation categoryStats(
-            YearMonth from,
-            YearMonth to,
-            @Nullable String iban
-    ) {
-        List<Criteria> criterias = new ArrayList<>();
-        criterias.add(Criteria.where("transactionDate").gte(from).lte(to));
+    public Aggregation categoryStats(@Nullable String iban) {
+        List<AggregationOperation> operations = new ArrayList<>();
 
         if (iban != null && !iban.isBlank()) {
-            criterias.add(Criteria.where("iban").is(iban));
+            operations.add(Aggregation.match(Criteria.where("iban").is(iban)));
         }
 
-        return Aggregation.newAggregation(
-                Aggregation.match(new Criteria().andOperator(criterias)),
+        operations.add(Aggregation.project("transactionType", "month", "amount")
+                .andExpression("cond(amount > 0, amount, 0)").as("income")
+                .andExpression("cond(amount < 0, abs(amount), 0)").as("expense"));
 
-                Aggregation.project("transactionType", "month", "amount")
+        operations.add(Aggregation.group("transactionType", "month")
+                .count().as("transactionsCount")
+                .sum("income").as("income")
+                .sum("expense").as("expense"));
+
+        operations.add(Aggregation.project("transactionsCount", "income", "expense")
+                .and("_id.transactionType").as("type")
+                .and("_id.transactionDate").as("month")
+                .andExpression("income - expense").as("net"));
+
+
+        return Aggregation.newAggregation(operations);
+    }
+
+    public Aggregation getMonthlyStats(YearMonth from, YearMonth to, String iban) {
+        List<AggregationOperation> operations = new ArrayList<>();
+
+        if (iban != null && !iban.isBlank()) {
+            operations.add(
+                    Aggregation.match(Criteria.where("iban").is(iban))
+            );
+        }
+
+        addMonthlyFilter(from, to, operations);
+
+        operations.add(
+                Aggregation.project("transactionDate", "amount")
                         .andExpression("cond(amount > 0, amount, 0)").as("income")
-                        .andExpression("cond(amount < 0, abs(amount), 0)").as("expense"),
+                        .andExpression("cond(amount < 0, abs(amount), 0)").as("expense")
+        );
 
-                Aggregation.group("transactionType", "month")
-                        .count().as("transactionsCount")
+        operations.add(
+                Aggregation.group("transactionDate")
+                        .count().as("transactionCount")
                         .sum("income").as("income")
-                        .sum("expense").as("expense"),
+                        .sum("expense").as("expense")
+        );
 
-                Aggregation.project("transactionsCount", "income", "expense")
-                        .and("_id.transactionType").as("type")
-                        .and("_id.transactionDate").as("month")
-                        .andExpression("income - expense").as("net"));
+        operations.add(
+                Aggregation.project("transactionCount", "income", "expense")
+                        .and("_id").as("month")
+                        .andExpression("income - expense").as("net")
+                        .andExclude("_id")
+        );
+
+        operations.add(
+                Aggregation.sort(Sort.by(Sort.Direction.ASC, "month"))
+        );
+
+        return Aggregation.newAggregation(operations);
+    }
+
+    private void addMonthlyFilter(
+            YearMonth from,
+            YearMonth to,
+            List<AggregationOperation> operations
+    ) {
+        if (from == null && to == null) {
+            return;
+        }
+
+        Criteria criteria = Criteria.where("transactionDate");
+
+        if (from != null) {
+            criteria = criteria.gte(from.toString());
+        }
+
+        if (to != null) {
+            criteria = criteria.lte(to.toString());
+        }
+
+        operations.add(Aggregation.match(criteria));
     }
 }

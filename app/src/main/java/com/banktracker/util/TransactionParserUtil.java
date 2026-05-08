@@ -6,6 +6,7 @@ import com.banktracker.model.ParsingErrorInfo;
 import com.banktracker.model.TransactionType;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -13,6 +14,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class TransactionParserUtil {
     CsvReader<NamedCsvRecord> records;
     String sessionId;
@@ -71,6 +73,7 @@ public class TransactionParserUtil {
         try {
             return new BigDecimal(value);
         } catch (NumberFormatException e) {
+            log.error("Invalid CSV row has been parsed for sessionId: {}", sessionId);
             throw new InvalidCsvRowException(
                     "Invalid amount: " + value
             );
@@ -81,6 +84,7 @@ public class TransactionParserUtil {
         try {
             return TransactionType.valueOf(value);
         } catch (IllegalArgumentException e) {
+            log.error("Wrong transaction type, got: {} with sessionId: {}", value, sessionId);
             throw new InvalidCsvRowException(
                     "Invalid transaction type: " + value
             );
