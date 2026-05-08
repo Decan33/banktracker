@@ -124,7 +124,7 @@ class TransactionsStatisticsServiceIntegrationTest
                 .amount(new BigDecimal("5000.00"))
                 .build());
 
-        var result = service.getCategories("PL111");
+        var result = service.getCategories();
 
         Assertions.assertThat(result).hasSize(2);
 
