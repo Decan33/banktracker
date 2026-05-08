@@ -38,8 +38,7 @@ class TransactionImportServiceIntegrationTest
         );
 
         var response = service.importTransaction(
-                file,
-                "PL111"
+                file
         );
 
         assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED);
@@ -73,8 +72,7 @@ class TransactionImportServiceIntegrationTest
         );
 
         var response = service.importTransaction(
-                file,
-                "PL111"
+                file
         );
 
         assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);

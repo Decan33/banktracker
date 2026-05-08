@@ -149,6 +149,6 @@ if __name__ == "__main__":
     generate_csv(
         output_path="bank_transactions.csv",
         row_count=10_000,
-        corruption_rate=0.02,
+        corruption_rate=0.00,
         iban_pool_size=1000,
     )

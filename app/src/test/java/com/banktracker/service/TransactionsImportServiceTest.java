@@ -47,7 +47,7 @@ public class TransactionsImportServiceTest {
         when(transactionImportRepository.existsByChecksum("abc123")).thenReturn(true);
 
         assertThatThrownBy(() ->
-                service.importTransaction(file, "PL94107510605753807963141749")
+                service.importTransaction(file)
         ).isInstanceOf(CsvImportException.class)
                 .hasMessageContaining("already imported");
 
@@ -74,8 +74,7 @@ public class TransactionsImportServiceTest {
         when(transactionImportRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var response = service.importTransaction(
-                file,
-                "PL94107510605753807963141749"
+                file
         );
 
         Assertions.assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED);
@@ -105,8 +104,7 @@ public class TransactionsImportServiceTest {
         when(transactionImportRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         var response = service.importTransaction(
-                file,
-                "PL94107510605753807963141749"
+                file
         );
 
         Assertions.assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);

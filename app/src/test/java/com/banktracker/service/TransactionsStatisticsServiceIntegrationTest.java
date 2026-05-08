@@ -93,9 +93,9 @@ class TransactionsStatisticsServiceIntegrationTest
                 java.time.YearMonth.of(2024, 2)
         );
 
-        Assertions.assertThat(result).hasSize(3);
+        Assertions.assertThat(result).hasSize(1);
         Assertions.assertThat(result.get(0).month()).isEqualTo("2024-02");
-        Assertions.assertThat(result.get(0).income()).isEqualByComparingTo("2000.00");
+        Assertions.assertThat(result.get(0).income()).isEqualByComparingTo("11999.00");
     }
 
     @Test
