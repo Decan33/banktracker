@@ -1,11 +1,8 @@
 package com.banktracker.model.response;
 
-import com.banktracker.model.TransactionType;
-
 import java.math.BigDecimal;
 
-public record CategoryStatsResponse(
-        TransactionType type,
+public record CategoryMonthlyStatsResponse(
         String month,
         long transactionCount,
         BigDecimal income,

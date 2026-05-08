@@ -124,18 +124,16 @@ class TransactionsStatisticsServiceIntegrationTest
                 .amount(new BigDecimal("5000.00"))
                 .build());
 
-        var result = service.getCategories();
+        var result = service.getCategories(TransactionType.SALARY);
 
-        Assertions.assertThat(result).hasSize(2);
+        Assertions.assertThat(result).hasSize(1);
 
-        var groceries = result.stream()
-                .filter(r -> r.type() == TransactionType.GROCERIES)
-                .findFirst()
-                .orElseThrow();
+        var groceries = service.getCategories(TransactionType.GROCERIES);
 
-        Assertions.assertThat(groceries.transactionCount()).isEqualTo(2);
-        Assertions.assertThat(groceries.expense()).isEqualByComparingTo("150.00");
-        Assertions.assertThat(groceries.income()).isEqualByComparingTo("0");
-        Assertions.assertThat(groceries.net()).isEqualByComparingTo("-150.00");
+        Assertions.assertThat(groceries).hasSize(1);
+        Assertions.assertThat(groceries.get(0).transactionCount()).isEqualTo(2);
+        Assertions.assertThat(groceries.get(0).expense()).isEqualByComparingTo("150.00");
+        Assertions.assertThat(groceries.get(0).income()).isEqualByComparingTo("0");
+        Assertions.assertThat(groceries.get(0).net()).isEqualByComparingTo("-150.00");
     }
 }

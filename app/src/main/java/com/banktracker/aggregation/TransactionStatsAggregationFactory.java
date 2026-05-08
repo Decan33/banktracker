@@ -1,7 +1,7 @@
 package com.banktracker.aggregation;
 
 import com.banktracker.exceptions.DateConflictException;
-import jakarta.annotation.Nullable;
+import com.banktracker.model.TransactionType;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
@@ -14,23 +14,28 @@ import java.util.List;
 
 @Component
 public class TransactionStatsAggregationFactory {
-    public Aggregation categoryStats() {
+    public Aggregation categoryStats(TransactionType type) {
         List<AggregationOperation> operations = new ArrayList<>();
 
-        operations.add(Aggregation.project("transactionType", "transactionDate", "amount")
+        operations.add(Aggregation.match(
+                Criteria.where("transactionType").is(type)
+        ));
+
+        operations.add(Aggregation.project("transactionDate", "amount")
                 .andExpression("cond(amount > 0, amount, 0)").as("income")
                 .andExpression("cond(amount < 0, abs(amount), 0)").as("expense"));
 
-        operations.add(Aggregation.group("transactionType", "transactionDate")
+        operations.add(Aggregation.group("transactionDate")
                 .count().as("transactionCount")
                 .sum("income").as("income")
                 .sum("expense").as("expense"));
 
         operations.add(Aggregation.project("transactionCount", "income", "expense")
-                .and("_id.transactionType").as("type")
-                .and("_id.transactionDate").as("month")
+                .and("_id").as("month")
                 .andExpression("income - expense").as("net")
                 .andExclude("_id"));
+
+        operations.add(Aggregation.sort(Sort.by(Sort.Direction.ASC, "month")));
 
 
         return Aggregation.newAggregation(operations);

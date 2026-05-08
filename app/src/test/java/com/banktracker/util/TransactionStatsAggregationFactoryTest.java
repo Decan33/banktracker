@@ -1,6 +1,7 @@
 package com.banktracker.util;
 
 import com.banktracker.aggregation.TransactionStatsAggregationFactory;
+import com.banktracker.model.TransactionType;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 
@@ -13,7 +14,7 @@ class TransactionStatsAggregationFactoryTest {
 
     @Test
     void categoryStatsShouldContainAggregationStages() {
-        Aggregation aggregation = factory.categoryStats();
+        Aggregation aggregation = factory.categoryStats(TransactionType.OTHER);
 
         var pipeline = aggregation.toPipeline(
                 org.springframework.data.mongodb.core.aggregation.Aggregation.DEFAULT_CONTEXT

@@ -1,6 +1,7 @@
 package com.banktracker.controller;
 
-import com.banktracker.model.response.CategoryStatsResponse;
+import com.banktracker.model.TransactionType;
+import com.banktracker.model.response.CategoryMonthlyStatsResponse;
 import com.banktracker.model.response.MonthlyStatsResponse;
 import com.banktracker.model.response.TransactionResponse;
 import com.banktracker.service.TransactionsStatisticsService;
@@ -27,9 +28,8 @@ public class TransactionsStatisticsController {
     private final TransactionsStatisticsService statisticsService;
 
     @GetMapping("/categories")
-    public List<CategoryStatsResponse> statisticsCategories() {
-        log.info("Started sorting transactions by categories");
-        return statisticsService.getCategories();
+    public List<CategoryMonthlyStatsResponse> statisticsCategories(@RequestParam(required = false) TransactionType category) {
+        return statisticsService.getCategories(category);
     }
 
     @GetMapping("/monthly")
