@@ -1,15 +1,15 @@
 package com.banktracker.service;
 
 import com.banktracker.exceptions.CsvImportException;
-import com.banktracker.model.TransactionDocument;
 import com.banktracker.model.ImportStatus;
 import com.banktracker.model.ImportTransactionResponse;
 import com.banktracker.model.ParsedTransactionFile;
+import com.banktracker.model.TransactionDocument;
 import com.banktracker.model.TransactionImport;
-import com.banktracker.repository.TransactionStatisticsRepository;
 import com.banktracker.repository.TransactionImportRepository;
-import com.banktracker.util.FileChecksumService;
+import com.banktracker.repository.TransactionStatisticsRepository;
 import com.banktracker.util.CsvTransactionParser;
+import com.banktracker.util.FileChecksumService;
 import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -89,7 +88,7 @@ public class TransactionsImportService {
             t.setErrorMessage(e.getMessage());
             transactionImportRepository.save(t);
 
-            throw new RuntimeException(e);
+            throw new CsvImportException("Could not parse CSV file", e);
         }
 
 
@@ -128,16 +127,13 @@ public class TransactionsImportService {
                     "Uploaded file is empty"
             );
         }
+        String filename = file.getOriginalFilename();
 
-        if (!Objects.requireNonNull(file.getOriginalFilename())
-                .endsWith(".csv")) {
-
-            throw new CsvImportException(
-                    "Only CSV files are supported"
-            );
+        if (filename == null || !filename.toLowerCase().endsWith(".csv")) {
+            throw new CsvImportException("Only CSV files are supported");
         }
 
-        long maxSize = 20 * 1024 * 1024;
+        long maxSize = 50 * 1024 * 1024;
 
         if (file.getSize() > maxSize) {
             throw new CsvImportException(

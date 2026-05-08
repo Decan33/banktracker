@@ -1,5 +1,6 @@
 package com.banktracker.util;
 
+import com.banktracker.exceptions.DateConflictException;
 import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
@@ -20,20 +21,20 @@ public class TransactionStatsAggregationFactory {
             operations.add(Aggregation.match(Criteria.where("iban").is(iban)));
         }
 
-        Aggregation.project("transactionType", "transactionDate", "amount")
+        operations.add(Aggregation.project("transactionType", "transactionDate", "amount")
                 .andExpression("cond(amount > 0, amount, 0)").as("income")
-                .andExpression("cond(amount < 0, abs(amount), 0)").as("expense");
+                .andExpression("cond(amount < 0, abs(amount), 0)").as("expense"));
 
-        Aggregation.group("transactionType", "transactionDate")
+        operations.add(Aggregation.group("transactionType", "transactionDate")
                 .count().as("transactionCount")
                 .sum("income").as("income")
-                .sum("expense").as("expense");
+                .sum("expense").as("expense"));
 
-        Aggregation.project("transactionCount", "income", "expense")
+        operations.add(Aggregation.project("transactionCount", "income", "expense")
                 .and("_id.transactionType").as("type")
                 .and("_id.transactionDate").as("month")
                 .andExpression("income - expense").as("net")
-                .andExclude("_id");
+                .andExclude("_id"));
 
 
         return Aggregation.newAggregation(operations);
@@ -84,6 +85,10 @@ public class TransactionStatsAggregationFactory {
     ) {
         if (from == null && to == null) {
             return;
+        }
+
+        if (from != null && to != null && from.isAfter(to)) {
+            throw new DateConflictException("'from' month must be before or equal to 'to' month");
         }
 
         Criteria criteria = Criteria.where("transactionDate");

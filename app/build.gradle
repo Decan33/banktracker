@@ -19,26 +19,29 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    // Source: https://mvnrepository.com/artifact/net.logstash.logback/logstash-logback-encoder
-    implementation("net.logstash.logback:logstash-logback-encoder:8.1")
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 
+    implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-    implementation 'org.springframework.boot:spring-boot-starter-mongodb'
+
+    implementation 'de.siegmar:fastcsv:4.2.0'
+    implementation 'net.logstash.logback:logstash-logback-encoder:8.1'
+
     compileOnly 'org.projectlombok:lombok'
-//    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     annotationProcessor 'org.projectlombok:lombok'
-//    testImplementation 'org.springframework.boot:spring-boot-starter-data-mongodb-test'
-//    testImplementation 'org.springframework.boot:spring-boot-starter-mongodb-test'
-//    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
-//    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
-//    testImplementation 'org.testcontainers:testcontainers-mongodb'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.boot:spring-boot-testcontainers'
+    testImplementation 'org.testcontainers:testcontainers-mongodb'
+    testImplementation 'org.testcontainers:junit-jupiter'
+    testImplementation 'org.testcontainers:testcontainers-junit-jupiter'
+    testImplementation 'org.testcontainers:mongodb'
+
     testCompileOnly 'org.projectlombok:lombok'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
-    implementation 'org.springframework.boot:spring-boot-starter'
-    implementation("de.siegmar:fastcsv:4.2.0")
+
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
