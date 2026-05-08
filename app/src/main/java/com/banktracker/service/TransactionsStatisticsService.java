@@ -26,9 +26,8 @@ public class TransactionsStatisticsService {
 
     private final TransactionStatisticsRepository bankTransactionRepository;
 
-    public List<CategoryStatsResponse> getCategories(String iban) {
-
-        var aggregation = aggregationFactory.categoryStats(iban);
+    public List<CategoryStatsResponse> getCategories() {
+        var aggregation = aggregationFactory.categoryStats();
 
         return mongoTemplate.aggregate(aggregation, "bank_transactions", CategoryStatsMongoResult.class)
                 .getMappedResults()
@@ -39,8 +38,8 @@ public class TransactionsStatisticsService {
 
     }
 
-    public List<MonthlyStatsResponse> getStatsByMonth(YearMonth from, YearMonth to, String iban) {
-        var aggregation = aggregationFactory.getMonthlyStats(from, to, iban);
+    public List<MonthlyStatsResponse> getStatsByMonth(YearMonth from, YearMonth to) {
+        var aggregation = aggregationFactory.getMonthlyStats(from, to);
 
         return mongoTemplate
                 .aggregate(aggregation, "bank_transactions", MonthlyStatsMongoResult.class)

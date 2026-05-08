@@ -27,17 +27,16 @@ public class TransactionsStatisticsController {
     private final TransactionsStatisticsService statisticsService;
 
     @GetMapping("/categories")
-    public List<CategoryStatsResponse> statisticsCategories(@RequestParam(required = false) String iban) {
+    public List<CategoryStatsResponse> statisticsCategories() {
         log.info("Started sorting transactions by categories");
-        return statisticsService.getCategories(iban);
+        return statisticsService.getCategories();
     }
 
     @GetMapping("/monthly")
     public List<MonthlyStatsResponse> statisticsMonth(@RequestParam(required = false) YearMonth from,
-                                                      @RequestParam(required = false) YearMonth to,
-                                                      @RequestParam(required = false) String iban
+                                                      @RequestParam(required = false) YearMonth to
     ) {
-        return statisticsService.getStatsByMonth(from, to, iban);
+        return statisticsService.getStatsByMonth(from, to);
     }
 
     @GetMapping("/iban")

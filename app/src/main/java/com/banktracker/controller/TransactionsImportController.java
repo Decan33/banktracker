@@ -17,8 +17,8 @@ public class TransactionsImportController {
     private final TransactionsImportService service;
 
     @PostMapping("/api/v1/transactions-import")
-    public ImportTransactionResponse uploadBankingInformation(@RequestParam("csv") MultipartFile csvFile, @RequestParam String accountIban) {
+    public ImportTransactionResponse uploadBankingInformation(@RequestParam("csv") MultipartFile csvFile) {
 
-        return service.importTransaction(csvFile, accountIban);
+        return service.importTransaction(csvFile);
     }
 }

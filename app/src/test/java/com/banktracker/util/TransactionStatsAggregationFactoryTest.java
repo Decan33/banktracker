@@ -13,7 +13,7 @@ class TransactionStatsAggregationFactoryTest {
 
     @Test
     void categoryStatsShouldContainAggregationStages() {
-        Aggregation aggregation = factory.categoryStats(null);
+        Aggregation aggregation = factory.categoryStats();
 
         var pipeline = aggregation.toPipeline(
                 org.springframework.data.mongodb.core.aggregation.Aggregation.DEFAULT_CONTEXT
@@ -23,20 +23,8 @@ class TransactionStatsAggregationFactoryTest {
     }
 
     @Test
-    void categoryStatsWithIbanShouldStartWithMatchStage() {
-        Aggregation aggregation = factory.categoryStats("PL123");
-
-        var pipeline = aggregation.toPipeline(
-                org.springframework.data.mongodb.core.aggregation.Aggregation.DEFAULT_CONTEXT
-        );
-
-        assertThat(pipeline.get(0).toJson()).contains("$match");
-        assertThat(pipeline.get(0).toJson()).contains("PL123");
-    }
-
-    @Test
     void monthlyStatsWithoutFiltersShouldNotContainEmptyAnd() {
-        Aggregation aggregation = factory.getMonthlyStats(null, null, null);
+        Aggregation aggregation = factory.getMonthlyStats(null, null);
 
         var pipeline = aggregation.toPipeline(
                 org.springframework.data.mongodb.core.aggregation.Aggregation.DEFAULT_CONTEXT

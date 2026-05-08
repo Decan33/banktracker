@@ -45,7 +45,7 @@ class TransactionsStatisticsServiceIntegrationTest
                 .amount(new BigDecimal("-2000.00"))
                 .build());
 
-        var result = service.getStatsByMonth(null, null, null);
+        var result = service.getStatsByMonth(null, null);
 
         Assertions.assertThat(result).hasSize(2);
 
@@ -63,7 +63,7 @@ class TransactionsStatisticsServiceIntegrationTest
     }
 
     @Test
-    void shouldFilterMonthlyStatsByIbanAndDateRange() {
+    void shouldFilterMonthlyStatsByDateRange() {
         repository.save(TransactionDocument.builder()
                 .iban("PL111")
                 .transactionDate("2024-01")
@@ -90,11 +90,10 @@ class TransactionsStatisticsServiceIntegrationTest
 
         var result = service.getStatsByMonth(
                 java.time.YearMonth.of(2024, 2),
-                java.time.YearMonth.of(2024, 2),
-                "PL111"
+                java.time.YearMonth.of(2024, 2)
         );
 
-        Assertions.assertThat(result).hasSize(1);
+        Assertions.assertThat(result).hasSize(3);
         Assertions.assertThat(result.get(0).month()).isEqualTo("2024-02");
         Assertions.assertThat(result.get(0).income()).isEqualByComparingTo("2000.00");
     }

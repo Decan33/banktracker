@@ -31,7 +31,7 @@ public class TransactionsImportService {
     private final TransactionImportRepository transactionImportRepository;
     private final FileChecksumService fileChecksumService;
 
-    public ImportTransactionResponse importTransaction(MultipartFile csvFile, String iban) {
+    public ImportTransactionResponse importTransaction(MultipartFile csvFile) {
         validateFile(csvFile);
 
         String checksum = fileChecksumService.sha256(csvFile);
@@ -49,7 +49,6 @@ public class TransactionsImportService {
                 .id(sessionId)
                 .filename(csvFile.getOriginalFilename())
                 .checksum(checksum)
-                .iban(iban)
                 .importStatus(ImportStatus.NEW)
                 .importTime(Instant.now())
                 .build();

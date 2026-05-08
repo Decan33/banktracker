@@ -23,7 +23,6 @@ public class TransactionImport {
     private String id;
     private final String filename;
     private final String checksum;
-    private final String iban;
     private ImportStatus importStatus;
     private final Instant importTime;
     Integer skippedRows;

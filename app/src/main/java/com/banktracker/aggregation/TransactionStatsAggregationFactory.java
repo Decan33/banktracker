@@ -14,12 +14,8 @@ import java.util.List;
 
 @Component
 public class TransactionStatsAggregationFactory {
-    public Aggregation categoryStats(@Nullable String iban) {
+    public Aggregation categoryStats() {
         List<AggregationOperation> operations = new ArrayList<>();
-
-        if (iban != null && !iban.isBlank()) {
-            operations.add(Aggregation.match(Criteria.where("iban").is(iban)));
-        }
 
         operations.add(Aggregation.project("transactionType", "transactionDate", "amount")
                 .andExpression("cond(amount > 0, amount, 0)").as("income")
@@ -40,14 +36,8 @@ public class TransactionStatsAggregationFactory {
         return Aggregation.newAggregation(operations);
     }
 
-    public Aggregation getMonthlyStats(YearMonth from, YearMonth to, String iban) {
+    public Aggregation getMonthlyStats(YearMonth from, YearMonth to) {
         List<AggregationOperation> operations = new ArrayList<>();
-
-        if (iban != null && !iban.isBlank()) {
-            operations.add(
-                    Aggregation.match(Criteria.where("iban").is(iban))
-            );
-        }
 
         addMonthlyFilter(from, to, operations);
 
