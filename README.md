@@ -159,8 +159,7 @@ Example:
 
 ```bash
 curl -X POST http://localhost:8080/api/v1/transaction-imports \
-  -F "csv=@bank_transactions.csv" \
-  -F "iban=PL94107510605753807963141749"
+  -F "csv=@bank_transactions.csv" 
 ```
 
 ---
@@ -182,13 +181,7 @@ Optional filters:
 ## Category statistics
 
 ```http
-GET /api/v1/transaction-statistics/categories
-```
-
-Optional filters:
-
-```text
-?iban=PL...
+GET /api/v1/transaction-statistics/categories?category=...
 ```
 
 ---
