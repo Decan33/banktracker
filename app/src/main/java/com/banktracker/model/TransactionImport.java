@@ -24,7 +24,6 @@ public class TransactionImport {
     private final String filename;
     private final String checksum;
     private final String iban;
-    private final String month;
     private ImportStatus importStatus;
     private final Instant importTime;
     Integer skippedRows;

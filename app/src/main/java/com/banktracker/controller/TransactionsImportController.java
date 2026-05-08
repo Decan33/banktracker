@@ -9,8 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.YearMonth;
-
 @RestController
 @RequestMapping
 @RequiredArgsConstructor
@@ -19,8 +17,8 @@ public class TransactionsImportController {
     private final TransactionsImportService service;
 
     @PostMapping("/api/v1/transactions-import")
-    public ImportTransactionResponse uploadBankingInformation(@RequestParam("csv") MultipartFile csvFile, @RequestParam String accountIban, @RequestParam YearMonth month) {
+    public ImportTransactionResponse uploadBankingInformation(@RequestParam("csv") MultipartFile csvFile, @RequestParam String accountIban) {
 
-        return service.importTransaction(csvFile, accountIban, month);
+        return service.importTransaction(csvFile, accountIban);
     }
 }

@@ -8,8 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.time.YearMonth;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TransactionImportServiceIntegrationTest
@@ -41,8 +39,7 @@ class TransactionImportServiceIntegrationTest
 
         var response = service.importTransaction(
                 file,
-                "PL111",
-                YearMonth.of(2024, 1)
+                "PL111"
         );
 
         assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED);
@@ -77,8 +74,7 @@ class TransactionImportServiceIntegrationTest
 
         var response = service.importTransaction(
                 file,
-                "PL111",
-                YearMonth.of(2024, 1)
+                "PL111"
         );
 
         assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);

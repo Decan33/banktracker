@@ -20,7 +20,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +31,7 @@ public class TransactionsImportService {
     private final TransactionImportRepository transactionImportRepository;
     private final FileChecksumService fileChecksumService;
 
-    public ImportTransactionResponse importTransaction(MultipartFile csvFile, String iban, YearMonth month) {
+    public ImportTransactionResponse importTransaction(MultipartFile csvFile, String iban) {
         validateFile(csvFile);
 
         String checksum = fileChecksumService.sha256(csvFile);
@@ -51,7 +50,6 @@ public class TransactionsImportService {
                 .filename(csvFile.getOriginalFilename())
                 .checksum(checksum)
                 .iban(iban)
-                .month(month.toString())
                 .importStatus(ImportStatus.NEW)
                 .importTime(Instant.now())
                 .build();

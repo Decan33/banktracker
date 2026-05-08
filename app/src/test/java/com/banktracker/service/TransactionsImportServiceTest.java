@@ -14,8 +14,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
-import java.time.YearMonth;
-
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -49,7 +47,7 @@ public class TransactionsImportServiceTest {
         when(transactionImportRepository.existsByChecksum("abc123")).thenReturn(true);
 
         assertThatThrownBy(() ->
-                service.importTransaction(file, "PL94107510605753807963141749", YearMonth.of(1984, 1))
+                service.importTransaction(file, "PL94107510605753807963141749")
         ).isInstanceOf(CsvImportException.class)
                 .hasMessageContaining("already imported");
 
@@ -77,8 +75,7 @@ public class TransactionsImportServiceTest {
 
         var response = service.importTransaction(
                 file,
-                "PL94107510605753807963141749",
-                YearMonth.of(1984, 1)
+                "PL94107510605753807963141749"
         );
 
         Assertions.assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED);
@@ -109,8 +106,7 @@ public class TransactionsImportServiceTest {
 
         var response = service.importTransaction(
                 file,
-                "PL94107510605753807963141749",
-                YearMonth.of(1984, 1)
+                "PL94107510605753807963141749"
         );
 
         Assertions.assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);
