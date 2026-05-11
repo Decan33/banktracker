@@ -153,7 +153,6 @@ Multipart form:
 | Field | Type    |
 | ----- | ------- |
 | csv   | file    |
-| iban  | string  |
 
 Example:
 
@@ -162,18 +161,56 @@ curl -X POST http://localhost:8080/api/v1/transaction-imports \
   -F "csv=@bank_transactions.csv" 
 ```
 
+Response:
+```
+{
+  "importTransactionId": "431b3f08-c80c-452d-b851-a85e6921b0df",
+  "status": "COMPLETED",
+  "importedRows": 100000,
+  "skippedRows": 0,
+  "errors": []
+}
+```
+
 ---
 
 ## Monthly statistics
 
 ```http
-GET /api/v1/transaction-statistics/months
+GET /api/v1/transaction-statistics/monthly
 ```
 
 Optional filters:
 
 ```text
-?from=2024-01&to=2024-12&iban=PL...
+?from=2024-01&to=2024-12
+```
+
+Response:
+```text
+[
+  {
+    "month": "2026-01",
+    "transactionCount": 9096,
+    "income": 25679590.68,
+    "expense": 19514222.49,
+    "net": 6165368.19
+  },
+  {
+    "month": "2026-03",
+    "transactionCount": 10000,
+    "income": 28525681.71,
+    "expense": 21320988.94,
+    "net": 7204692.77
+  },
+  {
+    "month": "2026-04",
+    "transactionCount": 10000,
+    "income": 27414518.80,
+    "expense": 21756343.48,
+    "net": 5658175.32
+  }
+]
 ```
 
 ---
@@ -184,21 +221,59 @@ Optional filters:
 GET /api/v1/transaction-statistics/categories?category=...
 ```
 
+Response:
+```text
+[
+  {
+    "month": "2026-01",
+    "transactionCount": 1320,
+    "income": 3296883.42,
+    "expense": 3305299.17,
+    "net": -8415.75
+  },
+  {
+    "month": "2026-03",
+    "transactionCount": 1471,
+    "income": 3704773.49,
+    "expense": 3651991.45,
+    "net": 52782.04
+  }, (...)
+```
+
 ---
 
-## Transactions
+## Sort by IBAN
 
 ```http
-GET /api/v1/transactions
+GET /api/v1/transaction-statistics/iban?iban=...
 ```
 
-Example:
-
+Response:
 ```text
-/api/v1/transactions?page=0&size=20&sort=transactionDate,desc
+{
+  "content": [
+    {
+      "iban": "PL04062624303764478473683593",
+      "transactionDate": "2026-07",
+      "currency": "PLN",
+      "transactionType": "RENT",
+      "amount": -1971.4
+    },
+    {
+      "iban": "PL04062624303764478473683593",
+      "transactionDate": "2026-07",
+      "currency": "PLN",
+      "transactionType": "TRANSFER",
+      "amount": -8656.53
+    },
+    {
+      "iban": "PL04062624303764478473683593",
+      "transactionDate": "2026-07",
+      "currency": "PLN",
+      "transactionType": "TRANSPORT",
+      "amount": -3934.56
+    },(...)
 ```
-
----
 
 # CSV format
 
