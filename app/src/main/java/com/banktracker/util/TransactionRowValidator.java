@@ -10,9 +10,14 @@ import java.time.YearMonth;
 import java.time.format.DateTimeParseException;
 import java.util.Set;
 
+import org.iban4j.IbanFormatException;
+import org.iban4j.IbanUtil;
+import org.iban4j.InvalidCheckDigitException;
+import org.iban4j.UnsupportedCountryException;
+import org.springframework.core.convert.ConversionFailedException;
+
 @Slf4j
 public class TransactionRowValidator {
-    public static final String IBAN_REGEX_PATTERN = "^[A-Z]{2}[0-9A-Z]{13,32}$";
     private final NamedCsvRecord record;
 
     public TransactionRowValidator(NamedCsvRecord record) {
@@ -32,8 +37,10 @@ public class TransactionRowValidator {
             throw new InvalidCsvRowException("IBAN is required");
         }
 
-        if (!iban.matches(IBAN_REGEX_PATTERN)) {
-            throw new InvalidCsvRowException("Invalid IBAN format: " + iban);
+        try {
+            IbanUtil.validate(iban);
+        } catch (IbanFormatException | InvalidCheckDigitException | UnsupportedCountryException ex) {
+            throw new InvalidCsvRowException("Invalid IBAN: " + iban);
         }
     }
 
@@ -42,19 +49,16 @@ public class TransactionRowValidator {
             YearMonth.parse(value);
         } catch (DateTimeParseException e) {
             throw new InvalidCsvRowException(
-                    "Invalid transactionDate: " + value
-            );
+                    "Invalid transactionDate: " + value);
         }
     }
 
     private void validateCurrency(String currency) {
-        Set<String> supported =
-                Set.of("PLN");
+        Set<String> supported = Set.of("PLN");
 
         if (!supported.contains(currency)) {
             throw new InvalidCsvRowException(
-                    "Unsupported currency: " + currency
-            );
+                    "Unsupported currency: " + currency);
         }
 
     }
@@ -64,8 +68,7 @@ public class TransactionRowValidator {
             TransactionType.valueOf(value);
         } catch (IllegalArgumentException e) {
             throw new InvalidCsvRowException(
-                    "Invalid transaction type: " + value
-            );
+                    "Invalid transaction type: " + value);
         }
     }
 
@@ -74,8 +77,7 @@ public class TransactionRowValidator {
             new BigDecimal(value);
         } catch (NumberFormatException e) {
             throw new InvalidCsvRowException(
-                    "Invalid amount: " + value
-            );
+                    "Invalid amount: " + value);
         }
     }
 }

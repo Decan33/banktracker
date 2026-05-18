@@ -6,6 +6,8 @@ import com.banktracker.repository.TransactionImportRepository;
 import com.banktracker.repository.TransactionStatisticsRepository;
 import com.banktracker.util.FileChecksumService;
 import org.assertj.core.api.Assertions;
+import org.iban4j.CountryCode;
+import org.iban4j.Iban;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,94 +24,93 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class TransactionsImportServiceTest {
 
-    @Mock
-    private TransactionStatisticsRepository transactionRepository;
+        @Mock
+        private TransactionStatisticsRepository transactionRepository;
 
-    @Mock
-    private TransactionImportRepository transactionImportRepository;
+        @Mock
+        private TransactionImportRepository transactionImportRepository;
 
-    @Mock
-    private FileChecksumService fileChecksumService;
+        @Mock
+        private FileChecksumService fileChecksumService;
 
-    @InjectMocks
-    private TransactionsImportService service;
+        @InjectMocks
+        private TransactionsImportService service;
 
-    @Test
-    void shouldRejectDuplicateFile() {
-        MockMultipartFile file = new MockMultipartFile(
-                "csv",
-                "transactions.csv",
-                "text/csv",
-                "iban,transactionDate,currency,transactionType,amount\n".getBytes()
-        );
+        @Test
+        void shouldRejectDuplicateFile() {
+                MockMultipartFile file = new MockMultipartFile(
+                                "csv",
+                                "transactions.csv",
+                                "text/csv",
+                                "iban,transactionDate,currency,transactionType,amount\n".getBytes());
 
-        when(fileChecksumService.sha256(file)).thenReturn("abc123");
-        when(transactionImportRepository.existsByChecksum("abc123")).thenReturn(true);
+                when(fileChecksumService.sha256(file)).thenReturn("abc123");
+                when(transactionImportRepository.existsByChecksum("abc123")).thenReturn(true);
 
-        assertThatThrownBy(() ->
-                service.importTransaction(file)
-        ).isInstanceOf(CsvImportException.class)
-                .hasMessageContaining("already imported");
+                assertThatThrownBy(() -> service.importTransaction(file)).isInstanceOf(CsvImportException.class)
+                                .hasMessageContaining("already imported");
 
-        Mockito.verify(transactionRepository, never()).saveAll(any());
-    }
+                Mockito.verify(transactionRepository, never()).saveAll(any());
+        }
 
-    @Test
-    void shouldImportValidCsv() {
-        String csv = """
-                iban,transactionDate,currency,transactionType,amount
-                PL94107510605753807963141749,1984-01,PLN,SALARY,5000.00
-                PL94107510605753807963141749,1984-01,PLN,GROCERIES,-100.00
-                """;
+        @Test
+        void shouldImportValidCsv() {
+                String csv = """
+                                iban,transactionDate,currency,transactionType,amount
+                                %s,1984-01,PLN,SALARY,5000.00
+                                %s,1984-01,PLN,GROCERIES,-100.00
+                                """;
 
-        MockMultipartFile file = new MockMultipartFile(
-                "csv",
-                "transactions.csv",
-                "text/csv",
-                csv.getBytes()
-        );
+                String ibanString = Iban.random(CountryCode.PL).toString();
+                csv = String.format(csv, ibanString, ibanString);
 
-        when(fileChecksumService.sha256(file)).thenReturn("abc123");
-        when(transactionImportRepository.existsByChecksum("abc123")).thenReturn(false);
-        when(transactionImportRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+                MockMultipartFile file = new MockMultipartFile(
+                                "csv",
+                                "transactions.csv",
+                                "text/csv",
+                                csv.getBytes());
 
-        var response = service.importTransaction(
-                file
-        );
+                when(fileChecksumService.sha256(file)).thenReturn("abc123");
+                when(transactionImportRepository.existsByChecksum("abc123")).thenReturn(false);
+                when(transactionImportRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Assertions.assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED);
-        Assertions.assertThat(response.importedRows()).isEqualTo(2);
-        Assertions.assertThat(response.skippedRows()).isZero();
+                var response = service.importTransaction(
+                                file);
 
-        Mockito.verify(transactionRepository).saveAll(any());
-    }
+                Assertions.assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED);
+                Assertions.assertThat(response.importedRows()).isEqualTo(2);
+                Assertions.assertThat(response.skippedRows()).isZero();
 
-    @Test
-    void shouldCompleteWithErrorsWhenCsvHasInvalidRows() {
-        String csv = """
-                iban,transactionDate,currency,transactionType,amount
-                PL94107510605753807963141749,1984-01,PLN,SALARY,5000.00
-                PL94107510605753807963141749,wrong,PLN,SALARY,5000.00
-                """;
+                Mockito.verify(transactionRepository).saveAll(any());
+        }
 
-        MockMultipartFile file = new MockMultipartFile(
-                "csv",
-                "transactions.csv",
-                "text/csv",
-                csv.getBytes()
-        );
+        @Test
+        void shouldCompleteWithErrorsWhenCsvHasInvalidRows() {
+                String csv = """
+                                iban,transactionDate,currency,transactionType,amount
+                                %s,1984-01,PLN,SALARY,5000.00
+                                PL94107510605753807963141749,wrong,PLN,SALARY,5000.00
+                                """;
 
-        when(fileChecksumService.sha256(file)).thenReturn("abc123");
-        when(transactionImportRepository.existsByChecksum("abc123")).thenReturn(false);
-        when(transactionImportRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+                String ibanString = Iban.random(CountryCode.PL).toString();
+                csv = String.format(csv, ibanString);
 
-        var response = service.importTransaction(
-                file
-        );
+                MockMultipartFile file = new MockMultipartFile(
+                                "csv",
+                                "transactions.csv",
+                                "text/csv",
+                                csv.getBytes());
 
-        Assertions.assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);
-        Assertions.assertThat(response.importedRows()).isEqualTo(1);
-        Assertions.assertThat(response.skippedRows()).isEqualTo(1);
-        Assertions.assertThat(response.errors()).hasSize(1);
-    }
+                when(fileChecksumService.sha256(file)).thenReturn("abc123");
+                when(transactionImportRepository.existsByChecksum("abc123")).thenReturn(false);
+                when(transactionImportRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+                var response = service.importTransaction(
+                                file);
+
+                Assertions.assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);
+                Assertions.assertThat(response.importedRows()).isEqualTo(1);
+                Assertions.assertThat(response.skippedRows()).isEqualTo(1);
+                Assertions.assertThat(response.errors()).hasSize(1);
+        }
 }

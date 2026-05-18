@@ -30,6 +30,9 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'org.iban4j:iban4j:3.2.13-RELEASE'
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test:4.1.0-RC1")
+    implementation("org.springframework.boot:spring-boot-test-autoconfigure:4.1.0-RC1")
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'

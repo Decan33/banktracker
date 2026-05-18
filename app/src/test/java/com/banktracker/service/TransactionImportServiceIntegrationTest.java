@@ -10,81 +10,88 @@ import org.springframework.mock.web.MockMultipartFile;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.iban4j.CountryCode;
+import org.iban4j.Iban;
+
 class TransactionImportServiceIntegrationTest
-        extends IntegrationTestsBase {
+                extends IntegrationTestsBase {
 
-    @Autowired
-    private TransactionsImportService service;
+        @Autowired
+        private TransactionsImportService service;
 
-    @Autowired
-    private TransactionStatisticsRepository transactionRepository;
+        @Autowired
+        private TransactionStatisticsRepository transactionRepository;
 
-    @Autowired
-    private TransactionImportRepository importRepository;
+        @Autowired
+        private TransactionImportRepository importRepository;
 
-    @Test
-    void shouldImportCsvAndSaveImportMetadata() {
-        String csv = """
-                iban,transactionDate,currency,transactionType,amount
-                PL75853612065313136425272702,2024-01,PLN,SALARY,5000.00
-                PL75853612065313136425272702,2024-01,PLN,GROCERIES,-100.00
-                """;
+        @Test
+        void shouldImportCsvAndSaveImportMetadata() {
+                String csv = """
+                                iban,transactionDate,currency,transactionType,amount
+                                %s,2024-01,PLN,SALARY,5000.00
+                                %s,2024-01,PLN,GROCERIES,-100.00
+                                """;
 
-        MockMultipartFile file = new MockMultipartFile(
-                "csv",
-                "transactions.csv",
-                "text/csv",
-                csv.getBytes()
-        );
+                String iban1 = Iban.random(CountryCode.PL).toString();
+                String iban2 = Iban.random(CountryCode.PL).toString();
 
-        var response = service.importTransaction(
-                file
-        );
+                csv = String.format(csv, iban1, iban2);
 
-        assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED);
-        assertThat(response.importedRows()).isEqualTo(2);
-        assertThat(response.skippedRows()).isZero();
+                MockMultipartFile file = new MockMultipartFile(
+                                "csv",
+                                "transactions.csv",
+                                "text/csv",
+                                csv.getBytes());
 
-        assertThat(transactionRepository.findAll()).hasSize(2);
-        assertThat(importRepository.findAll()).hasSize(1);
+                var response = service.importTransaction(
+                                file);
 
-        var importBatch = importRepository.findAll().get(0);
+                assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED);
+                assertThat(response.importedRows()).isEqualTo(2);
+                assertThat(response.skippedRows()).isZero();
 
-        assertThat(importBatch.getImportStatus()).isEqualTo(ImportStatus.COMPLETED);
-        assertThat(importBatch.getImportedRows()).isEqualTo(2);
-        assertThat(importBatch.getSkippedRows()).isZero();
-    }
+                assertThat(transactionRepository.findAll()).hasSize(2);
+                assertThat(importRepository.findAll()).hasSize(1);
 
-    @Test
-    void shouldCompleteWithErrorsWhenCsvContainsInvalidRows() {
-        String csv = """
-                iban,transactionDate,currency,transactionType,amount
-                PL75853612065313136425272702,2024-01,PLN,SALARY,5000.00
-                PL75853612065313136425272702,wrong,PLN,SALARY,5000.00
-                PL75853612065313136425272702,2024-01,PLN,INVALID_TYPE,-100.00
-                """;
+                var importBatch = importRepository.findAll().get(0);
 
-        MockMultipartFile file = new MockMultipartFile(
-                "csv",
-                "transactions.csv",
-                "text/csv",
-                csv.getBytes()
-        );
+                assertThat(importBatch.getImportStatus()).isEqualTo(ImportStatus.COMPLETED);
+                assertThat(importBatch.getImportedRows()).isEqualTo(2);
+                assertThat(importBatch.getSkippedRows()).isZero();
+        }
 
-        var response = service.importTransaction(
-                file
-        );
+        @Test
+        void shouldCompleteWithErrorsWhenCsvContainsInvalidRows() {
+                String csv = """
+                                iban,transactionDate,currency,transactionType,amount
+                                %s,2024-01,PLN,SALARY,5000.00
+                                %s,wrong,PLN,SALARY,5000.00
+                                %s,2024-01,PLN,INVALID_TYPE,-100.00
+                                """;
+                String ibanString = Iban.random(CountryCode.PL).toString();
 
-        assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);
-        assertThat(response.importedRows()).isEqualTo(1);
-        assertThat(response.skippedRows()).isEqualTo(2);
-        assertThat(response.errors()).hasSize(2);
+                csv = String.format(csv, ibanString, ibanString, ibanString);
 
-        assertThat(transactionRepository.findAll()).hasSize(1);
+                MockMultipartFile file = new MockMultipartFile(
+                                "csv",
+                                "transactions.csv",
+                                "text/csv",
+                                csv.getBytes());
 
-        var importBatch = importRepository.findAll().get(0);
+                var response = service.importTransaction(
+                                file);
 
-        assertThat(importBatch.getImportStatus())
-                .isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);
-    }
+                assertThat(response.status()).isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);
+                assertThat(response.importedRows()).isEqualTo(1);
+                assertThat(response.skippedRows()).isEqualTo(2);
+                assertThat(response.errors()).hasSize(2);
+
+                assertThat(transactionRepository.findAll()).hasSize(1);
+
+                var importBatch = importRepository.findAll().get(0);
+
+                assertThat(importBatch.getImportStatus())
+                                .isEqualTo(ImportStatus.COMPLETED_WITH_ERRORS);
+        }
 }

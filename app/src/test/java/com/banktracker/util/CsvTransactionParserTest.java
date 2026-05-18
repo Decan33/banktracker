@@ -5,6 +5,8 @@ import de.siegmar.fastcsv.reader.CsvReader;
 import de.siegmar.fastcsv.reader.FieldMismatchStrategy;
 import de.siegmar.fastcsv.reader.NamedCsvRecord;
 import org.assertj.core.api.Assertions;
+import org.iban4j.CountryCode;
+import org.iban4j.Iban;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -17,11 +19,18 @@ public class CsvTransactionParserTest {
     void shouldParseValidRowsAndCollectInvalidRowsAsErrors() throws Exception {
         String csv = """
                 iban,transactionDate,currency,transactionType,amount
-                PL94107510605753807963141749,2024-01,PLN,SALARY,5000.00
-                PL94107510605753807963141749,not-a-month,PLN,SALARY,5000.00
-                PL94107510605753807963141749,2024-01,PLN,WRONG_TYPE,123.45
-                PL94107510605753807963141749,2024-01,PLN,GROCERIES,-123.45
+                %s,2024-01,PLN,SALARY,5000.00
+                %s,not-a-month,PLN,SALARY,5000.00
+                %s,2024-01,PLN,WRONG_TYPE,123.45
+                %s,2024-01,PLN,GROCERIES,-123.45
                 """;
+
+        String iban1 = Iban.random(CountryCode.PL).toString();
+        String iban2 = Iban.random(CountryCode.PL).toString();
+        String iban3 = Iban.random(CountryCode.PL).toString();
+        String iban4 = Iban.random(CountryCode.PL).toString();
+
+        csv = String.format(csv, iban1, iban2, iban3, iban4);
 
         try (CsvReader<NamedCsvRecord> reader = CsvReader
                 .builder()
