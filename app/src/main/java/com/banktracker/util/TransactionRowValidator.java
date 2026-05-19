@@ -14,7 +14,6 @@ import org.iban4j.IbanFormatException;
 import org.iban4j.IbanUtil;
 import org.iban4j.InvalidCheckDigitException;
 import org.iban4j.UnsupportedCountryException;
-import org.springframework.core.convert.ConversionFailedException;
 
 @Slf4j
 public class TransactionRowValidator {
